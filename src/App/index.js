@@ -11,7 +11,7 @@ const App = ({ theme }) => {
             <div className="App">
                 <h1>Custom Select</h1>
                 <div style={{ marginBottom: 20 }}>
-                    <CustomSelect placeholder="Select Country" value="" options={countries} />
+                    <CustomSelect error placeholder="Select Country" value="" options={countries} />
                 </div>
                 <div style={{ marginBottom: 20 }}>
                     <CustomSelect placeholder="Select Currency" value="" options={currencies} />

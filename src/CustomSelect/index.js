@@ -1,11 +1,15 @@
 import React, { Component } from 'react'
-import Select from 'react-select'
+import Select, { components } from 'react-select'
+// import Menu from 'react-select/lib/components/Menu'
 import styled from 'styled-components'
+
+import theme from '../theme'
+
+console.log(theme)
 
 const SelectWrapper = styled.div`
     font-family: Arial;
     position: relative;
-    z-index: 1;
 `
 
 const SelectLabel = styled.span`
@@ -13,16 +17,78 @@ const SelectLabel = styled.span`
     left: 8px;
     top: ${({ floating }) => (floating ? '-6px' : '12px')};
     font-size: ${({ floating }) => (floating ? '10px' : '14px')};
-    color: #333;
+    color: ${({ theme }) => theme.gray};
     z-index: 1;
     box-sizing: 'border-box';
     pointer-events: 'none';
     padding: 0 4px;
     transition: font-size 200ms ease, padding 200ms ease;
     background: ${({ theme }) => theme.white};
+    z-index: ${({ theme }) => console.log(theme)};
 `
 
+const customStyles = {
+    // option: (provided, state) => ({
+    //     ...provided,
+    //     // borderBottom: '1px dotted pink',
+    //     color: '#09091e',
+    //     background: state.isSelected ? '#ccc' : 'transparent',
+    //     // padding: 20,
+    // }),
+    // control: () => ({
+    //     // none of react-select's styles are passed to <Control />
+    //     width: 200,
+    // }),
+    // singleValue: (provided, state) => {
+    //     const opacity = state.isDisabled ? 0.5 : 1
+    //     const transition = 'opacity 300ms'
+
+    //     return { ...provided, opacity, transition }
+    // },
+
+    // control: styles => ({ ...styles, backgroundColor: 'white' }),
+    option: (styles, { isDisabled, isFocused, isSelected }) => {
+        return {
+            ...styles,
+            backgroundColor: isDisabled
+                ? null
+                : isSelected
+                ? '#d6d6f5'
+                : isFocused
+                ? '#eeeeee'
+                : null,
+            color: '#09091e',
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
+        }
+    },
+    // input: styles => ({ ...styles, ...dot() }),
+    // placeholder: styles => ({ ...styles, ...dot() }),
+    // singleValue: (styles, { data }) => ({ ...styles, ...dot(data.color) }),
+
+    menu: provided => ({ ...provided, zIndex: 2 }),
+}
+
+const menuStyles = {
+    border: `2px dotted #000000`,
+    borderRadius: '5px',
+    background: '#f2fcff',
+    zIndex: 2,
+}
+
+const Menu = props => (
+    <div style={menuStyles}>
+        <components.Menu {...props} />
+    </div>
+)
+
 class CustomSelect extends Component {
+    constructor(props) {
+        super(props)
+        // create a ref to store the textInput DOM element
+        this.customSelect = React.createRef()
+        this.focusSelectLabel = this.focusSelectLabel.bind(this)
+    }
+
     state = {
         floating: false,
         focused: false,
@@ -53,13 +119,20 @@ class CustomSelect extends Component {
         return value.length || focused
     }
 
+    focusSelectLabel() {
+        // Explicitly focus the text input using the raw DOM API
+        // Note: we're accessing "current" to get the DOM node
+        this.customSelect.current.focus()
+    }
+
     render() {
         const { value, focused } = this.state
         const floating = this.isFloating(value, focused)
+        const { error } = this.props
 
         return (
             <SelectWrapper>
-                <SelectLabel floating={floating} onClick={this.labelClick}>
+                <SelectLabel floating={floating} onClick={this.focusSelectLabel}>
                     {this.props.placeholder}
                 </SelectLabel>
                 <Select
@@ -68,6 +141,12 @@ class CustomSelect extends Component {
                     onBlur={this.handleFocusChange}
                     onChange={this.handleChange}
                     onFocus={this.handleFocusChange}
+                    ref={this.customSelect}
+                    error={error}
+                    // styles={{
+                    //     menu: provided => ({ ...provided, zIndex: 2 }),
+                    // }}
+                    styles={customStyles}
                 />
             </SelectWrapper>
         )
